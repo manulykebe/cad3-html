@@ -1,6 +1,8 @@
+declare const sketchup: any;
+
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Server } from 'lucide-react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { ThemeProvider } from './context/ThemeContext';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -13,9 +15,90 @@ function AppContent() {
   const [error, setError] = useState('');
   const [token, setToken] = useState(Cookies.get('token') || '');
 
+  const [entries, setEntries] = useState<string[]>([]);
+  const [newEntry, setNewEntry] = useState('');
+
+  useEffect(() => {
+    // Auto-login
+    const login = async () => {
+      try {
+        const response = await axios.post('/api/login', { username: 'demo', password: 'demo' });
+        const newToken = response.data.token;
+        Cookies.set('token', newToken, { expires: 1 }); // Expires in 1 day
+        setToken(newToken);
+      } catch (err) {
+        setError('Login failed');
+      }
+    };
+
+    if (!token) {
+      login();
+    }
+  }, [token]);
+
+  useEffect(() => {
+    // Request initial entries from SketchUp
+    if (token && typeof sketchup !== 'undefined') {
+      sketchup.getEntries();
+    }
+  }, [token]);
+
+  // Define the updateDropdown function and attach it to the window object
+  const updateDropdown = (entries: string[]) => {
+    setEntries(entries);
+  };
+
+  useEffect(() => {
+    // Attach the updateDropdown function to the window object
+    (window as any).updateDropdown = updateDropdown;
+  }, []);
+
+  const handleSetOriginal = () => {
+    if (typeof sketchup !== 'undefined') {
+      const selectedEntry = (
+        document.getElementById('entriesDropdown') as HTMLSelectElement
+      ).value;
+      sketchup.setOriginalState(selectedEntry);
+    }
+  };
+
+  const handleSetNew = () => {
+    if (typeof sketchup !== 'undefined') {
+      const selectedEntry = (
+        document.getElementById('entriesDropdown') as HTMLSelectElement
+      ).value;
+      sketchup.setNewState(selectedEntry);
+    }
+  };
+
+  const handleGetOriginal = () => {
+    if (typeof sketchup !== 'undefined') {
+      const selectedEntry = (
+        document.getElementById('entriesDropdown') as HTMLSelectElement
+      ).value;
+      sketchup.getOriginalState(selectedEntry);
+    }
+  };
+
+  const handleGetNew = () => {
+    if (typeof sketchup !== 'undefined') {
+      const selectedEntry = (
+        document.getElementById('entriesDropdown') as HTMLSelectElement
+      ).value;
+      sketchup.getNewState(selectedEntry);
+    }
+  };
+
+  const handleAddEntry = () => {
+    if (typeof sketchup !== 'undefined' && newEntry) {
+      sketchup.addEntry(newEntry);
+      setNewEntry('');
+    }
+  };
+
   const login = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/login');
+      const response = await axios.post('http://localhost:5000/api/login', { username: 'demo', password: 'demo' });
       const newToken = response.data.token;
       Cookies.set('token', newToken, { expires: 1 }); // Expires in 1 day
       setToken(newToken);
@@ -33,7 +116,7 @@ function AppContent() {
         }
 
         const response = await axios.get('http://localhost:5000/api/greeting', {
-          headers: { Authorization: `Bearer ${token}` }
+          headers: { Authorization: `Bearer ${token}` },
         });
         setServerMessage(response.data.message);
         setLoading(false);
@@ -46,20 +129,16 @@ function AppContent() {
     fetchGreeting();
   }, [token]);
 
+  if (!token) {
+    return <Navigate to="/login" />;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
       <ThemeToggle isDark={isDark} toggle={toggle} />
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-4">
         <div className="max-w-2xl mx-auto">
           <div className="bg-gray-100 dark:bg-gray-900 rounded-2xl shadow-xl p-8">
-            <div className="flex items-center justify-center mb-8">
-              <Server className="w-12 h-12 text-blue-600 dark:text-blue-400" />
-            </div>
-            
-            <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-8">
-              Full Stack Application
-            </h1>
-
             <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-6 mb-6">
               <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4">
                 Server Status
@@ -69,12 +148,119 @@ function AppContent() {
               ) : error ? (
                 <p className="text-red-500 dark:text-red-400">{error}</p>
               ) : (
-                <p className="text-green-600 dark:text-green-400">{serverMessage}</p>
+                <p className="text-green-600 dark:text-green-400">
+                  {serverMessage}
+                </p>
               )}
             </div>
 
+            <div className="space-y-4">
+              <button
+                onClick={handleSetOriginal}
+                className="w-48 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Set Original State
+              </button>
+              <button
+                onClick={handleSetNew}
+                className="w-48 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Set New State
+              </button>
+              <button
+                onClick={handleGetOriginal}
+                className="w-48 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Get Original State
+              </button>
+              <button
+                onClick={handleGetNew}
+                className="w-48 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Get New State
+              </button>
+            </div>
+
+            <br />
+
+            <div className="flex space-x-4">
+              <input
+                type="text"
+                value={newEntry}
+                onChange={(e) => setNewEntry(e.target.value)}
+                placeholder="Enter new value"
+                className="flex-grow py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+              />
+              <button
+                onClick={handleAddEntry}
+                className="py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Add Entry
+              </button>
+            </div>
+
+            <br />
+
+            <select
+              id="entriesDropdown"
+              className="overflow-auto w-full border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+            >
+              {entries.map((entry, index) => (
+                <option key={index} value={entry}>
+                  {entry}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function Login() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post('/api/login', { username, password });
+      const newToken = response.data.token;
+      Cookies.set('token', newToken, { expires: 1 }); // Expires in 1 day
+      window.location.href = '/';
+    } catch (err) {
+      setError('Login failed');
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-yellow-100 to-yellow-200 dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
+      <div className="bg-gray-100 dark:bg-gray-900 rounded-2xl shadow-xl p-8">
+        <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-4">
+          Login
+        </h2>
+        {error && <p className="text-red-500 dark:text-red-400">{error}</p>}
+        <input
+          type="text"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Username"
+          className="w-full py-2 px-4 mb-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          className="w-full py-2 px-4 mb-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
+        />
+        <button
+          onClick={handleLogin}
+          className="w-full py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Login
+        </button>
       </div>
     </div>
   );
@@ -83,7 +269,12 @@ function AppContent() {
 function App() {
   return (
     <ThemeProvider>
-      <AppContent />
+      <Router>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<AppContent />} />
+        </Routes>
+      </Router>
     </ThemeProvider>
   );
 }
