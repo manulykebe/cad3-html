@@ -1,0 +1,123 @@
+/* Plugin metadata */
+"Ruby Console+"="Ruby Console+";
+"An alternative Ruby Console with many useful features."="An alternative Ruby Console with many useful features.";
+
+/* Settings */
+"fontSize"="Font size";
+"tabSize"="Tab size";
+"useSoftTabs"="Spaces as tab stops";
+"useWrapMode"="Wrap lines";
+"editMode"="Programming language";
+"theme"="Theme";
+"evaluationKeyBinding"="Shortcut to run code";
+"shift"="Shift";
+"ctrl"="Ctrl";
+"enter"="Enter";
+
+/* Console */
+"Console"="Console";
+"Press the %0 key to evaluate the input, and use %1 for linebreaks."="Press the %0 key to evaluate the input, and use %1 for linebreaks.";
+"Clear"="Clear";
+"Menu"="Menu";
+"Show shortcuts"="Show shortcuts";
+"Switch between console and editor"="Switch between console and editor";
+
+/* Editor */
+"Editor"="Editor";
+"Run"="Run";
+"Open"="Open";
+"More files…"="More files…";
+"Open a text file to edit"="Open a text file to edit";
+"Only Ruby code can be run."="Only Ruby code can be run.";
+"If this is Ruby code, set the edit mode in the menu."="If this is Ruby code, set the language in the menu.";
+"Running the code…"="Running the code…";
+"Code was run and returned: \n %0"="Code was run and returned: \n %0";
+"Code was run successfully!"="Code was run successfully!";
+"Code failed with an error: \n %0"="Code failed with an error: \n %0";
+"Unsaved document"="Unsaved document";
+"Save changes to current file?"="Save changes to current file?";
+"Save"="Save";
+"Save the current file as…"="Save the current file as…";
+"Failed to save file"="Failed to save file";
+"New"="New";
+"Save as…"="Save as…";
+"Find…"="Find…";
+"Find and replace…"="Find and replace…";
+"Go to line…"="Go to line…";
+"Saved"="Saved";
+"The file has been changed externally.\nOverwrite external changes and save the current file?"="The file has been changed externally.\nOverwrite external changes and save the current file?";
+"The file was changed externally."="The file was changed externally.";
+"Reload"="Reload";
+"Ignore"="Ignore";
+"Yes"="Yes";
+"No"="No";
+
+/* Features */
+
+/* Binding */
+"binding"="Binding";
+
+/* History */
+"Go one command back in the history."="Go one command back in the history.";
+"Go one command forward in the history."="Go one command forward in the history.";
+
+/* Reload Scripts */
+"reload_scripts"="Monitored scripts";
+"%0 reloaded"="%0 reloaded";
+"Scripts reloaded"="Scripts reloaded";
+"Click to remove files from auto-loading"="Click to remove files from auto-loading";
+
+/* Autocomplete */
+"global_variable"="global variable";
+"instance_variable"="instance variable";
+"class_variable"="class variable";
+"local_variable"="local variable";
+"instance_method"="instance method";
+"class_method"="class method";
+"module_function"="module function";
+"constant"="constant";
+"module"="module";
+"class"="class";
+
+/* Documentation */
+"Help"="Help";
+"Show documentation for the currently focussed word in a browser window."="Show documentation for the currently focussed word in a browser window.";
+"The help function can only lookup Ruby documentation."="The help function can only lookup Ruby documentation.";
+"Documentation not found"="Documentation not found";
+"Documentation for %0 not found at url %1"="Documentation for %0 not found at url %1";
+"Parameters"="Parameters";
+"Return value"="Return value";
+"Documentation"="Documentation";
+"Back"="Back";
+"Forward"="Forward";
+"Search Engine"="Search Engine";
+"Search…"="Search…";
+
+/* Select entity */
+"Select"="Select";
+"Click to select an entity. Right-click to abort. Press the ctrl key to select points. Press the shift key to use inferencing."="Click to select an entity. Right-click to abort. Press the ctrl key to select points. Press the shift key to use inferencing.";
+
+/* Wrap in undo */
+"wrap_in_undo"="Wrap in undoable operation";
+"Ruby Console operation %0"="Ruby Console operation %0";
+
+/* Ruby Tutorials */
+"tutorials"="Tutorials";
+"Welcome to Ruby Console+"="Welcome to Ruby Console+";
+"Welcome!"="Welcome!";
+"Start with Ruby in 30 minutes"="Start with
+Ruby in 30 minutes";
+"Begin learning Ruby in SketchUp"="Start learning
+Ruby in SketchUp";
+"No, thanks!"="No, thanks!";
+"(Credits to Ivo Herweijer and TryRuby.org)"="(Credits to Ivo Herweijer and TryRuby.org)";
+"You can access the tutorials later again in Ruby Console+ in the menu button."="You can access the tutorials later again in Ruby Console+ in the menu button.";
+"Select a tutorial"="Select a tutorial";
+"Step"="Step";
+"Start"="Start";
+"Tip"="Tip";
+"Solution"="Solution";
+"Sorry, I don't have any tips."="Sorry, I don't have any tips.";
+"Sorry, I don't know the solution either."="Sorry, I don't know the solution either.";
+"You proceded up to step %0 of %1!"="You proceded up to step %0 of %1!";
+"See you next time!"="See you next time!";

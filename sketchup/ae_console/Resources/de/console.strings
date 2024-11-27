@@ -1,0 +1,124 @@
+/* Plugin metadata */
+"Ruby Console+"="Ruby-Konsole+";
+"An alternative Ruby Console with many useful features."="Eine alternative Ruby-Konsole mit vielen nützlichen Funktionen.";
+
+/* Settings */
+"fontSize"="Schriftgröße";
+"tabSize"="Tabgröße";
+"useSoftTabs"="Leerzeichen für Tabstops";
+"useWrapMode"="Zeilen umbrechen";
+"editMode"="Programmiersprache";
+"theme"="Thema";
+"evaluationKeyBinding"="Tastenkürzel zum Ausführen";
+"shift"="Umschalt";
+"ctrl"="Strg";
+"enter"="Eingabe";
+
+/* Console */
+"Console"="Konsole";
+"Press the %0 key to evaluate the input, and use %1 for linebreaks."="Zum Ausführen der Eingabe die %0-Taste drücken, und %1 drücken für Zeilenwechsel.";
+"Clear"="Leeren";
+"Menu"="Menü";
+"Show shortcuts"="Tastenkürzel anzeigen";
+"Switch between console and editor"="Zwischen Konsole und Editor wechseln";
+
+/* Editor */
+"Editor"="Editor";
+"Run"="Ausführen";
+"Open"="Öffnen";
+"More files…"="Mehr Dateien…";
+"Open a text file to edit"="Öffne eine Textdatei zum Bearbeiten";
+"Only Ruby code can be run."="Nur Ruby-Code kann ausgeführt werden.";
+"If this is Ruby code, set the edit mode in the menu."="Wenn das Ruby-Code ist, ändere die Programmiersprache im Menü.";
+"Running the code…"="Code wird ausgeführt…";
+"Code was run and returned: \n %0"="Code wurde ausgeführt und gab zurück: \n %0";
+"Code was run successfully!"="Code wurde erfolgreich ausgeführt!";
+"Code failed with an error: \n %0"="Code schlug fehl mit folgendem Fehler: \n %0";
+"Unsaved document"="Ungespeichertes Dokument";
+"Save changes to current file?"="Änderungen der aktuellen Datei speichern?";
+"Save"="Speichern";
+"Save the current file as…"="Aktuelle Datei speichern als…";
+"Failed to save file"="Speichern schlug fehl";
+"New"="Neu";
+"Save as…"="Speichern als…";
+"Find…"="Suchen…";
+"Find and replace…"="Suchen und ersetzen…";
+"Go to line…"="Gehe zu Zeile…";
+"Saved"="Gespeichert";
+"The file has been changed externally.\nOverwrite external changes and save the current file?"="Die Datei wurde von außerhalb geändert.\nExterne Änderungen überschreiben und die aktuelle Datei speichern?";
+"The file was changed externally."="Die Datei wurde von außerhalb geändert.";
+"Reload"="Neuladen";
+"Ignore"="Ignoren";
+"Yes"="Ja";
+"No"="Nein";
+
+
+/* Features */
+
+/* Binding */
+"binding"="Bindung";
+
+/* History */
+"Go one command back in the history."="Ein Befehl im Verlauf zurückgehen.";
+"Go one command forward in the history."="Ein Befehl im Verlauf vorwärtsgehen.";
+
+/* Reload Scripts */
+"reload_scripts"="Überwachte Skripte";
+"%0 reloaded"="%0 neugeladen";
+"Scripts reloaded"="Skripte neugeladen";
+"Click to remove files from auto-loading"="Klicken um Dateine nicht mehr neuzuladen";
+
+/* Autocomplete */
+"global_variable"="globale Variable";
+"instance_variable"="Instanzvariable";
+"class_variable"="Klassenvariable";
+"local_variable"="lokale Variable";
+"instance_method"="Instanzmethode";
+"class_method"="Klassenmethode";
+"module_function"="Modulfunktion";
+"constant"="Konstante";
+"module"="Modul";
+"class"="Klasse";
+
+/* Documentation */
+"Help"="Hilfe";
+"Show documentation for the currently focussed word in a browser window."="Zeige Dokumentation für das aktuell ausgewählte Wort in einem Browser-Fenster.";
+"The help function can only lookup Ruby documentation."="Die Hilfe-Funktion kann nur Ruby-Dokumentation nachschlagen.";
+"Documentation not found"="Dokumentation nicht gefunden";
+"Documentation for %0 not found at url %1"="Die Dokumentation für %0 wurde nicht unter %1 gefunden.";
+"Parameters"="Parameter";
+"Return value"="Rückgabewert";
+"Documentation"="Dokumentation";
+"Back"="Zurück";
+"Forward"="Vorwärts";
+"Search Engine"="Suchmaschine";
+"Search…"="Suchen…";
+
+/* Select entity */
+"Select"="Auswählen";
+"Click to select an entity. Right-click to abort. Press the ctrl key to select points. Press the shift key to use inferencing."="Zum Auswählen eines Elements klicken. Zum Abbrechen rechtsklicken. Die Strg-Taste halten um Punkte auszuwählen. Die Umschalttaste halten zum Einrasten.";
+
+/* Wrap in undo */
+"wrap_in_undo"="rückgängigmachbare Operation";
+"Ruby Console operation %0"="Ruby-Konsole Operation %0";
+
+/* Ruby Tutorials */
+"tutorials"="Tutorials";
+"Welcome to Ruby Console+"="Willkommen in der Ruby Konsole+";
+"Welcome!"="Willkommen!";
+"Start with Ruby in 30 minutes"="Beginne mit Ruby
+in 30 Minuten";
+"Begin learning Ruby in SketchUp"="Lerne 
+Ruby in SketchUp";
+"No, thanks!"="Nein, danke!";
+"(Credits to Ivo Herweijer and TryRuby.org)"="(Dank an Ivo Herweijer und TryRuby.org)";
+"You can access the tutorials later again in Ruby Console+ in the menu button."="Du kannst die Tutorials später in der Ruby Konsole+ unter dem Menüknopf wiederfinden.";
+"Select a tutorial"="Wähle ein Tutorial aus";
+"Step"="Schritt";
+"Start"="Start";
+"Tip"="Tipp";
+"Solution"="Lösung";
+"Sorry, I don't have any tips."="Sorry, ich habe keine weiteren Tipps.";
+"Sorry, I don't know the solution either."="Sorry, ich kenne die Lösung auch nicht.";
+"You proceded up to step %0 of %1!"="Du bist bis zum Schritt %0 von %1 gekommen!";
+"See you next time!"="Bis zum nächsten Mal!";
