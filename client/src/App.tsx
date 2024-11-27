@@ -2,7 +2,12 @@ declare const sketchup: any;
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from 'react-router-dom';
 import Cookies from 'js-cookie';
 import { ThemeProvider } from './context/ThemeContext';
 import { ThemeToggle } from './components/ThemeToggle';
@@ -17,24 +22,6 @@ function AppContent() {
 
   const [entries, setEntries] = useState<string[]>([]);
   const [newEntry, setNewEntry] = useState('');
-
-  useEffect(() => {
-    // Auto-login
-    const login = async () => {
-      try {
-        const response = await axios.post('/api/login', { username: 'demo', password: 'demo' });
-        const newToken = response.data.token;
-        Cookies.set('token', newToken, { expires: 1 }); // Expires in 1 day
-        setToken(newToken);
-      } catch (err) {
-        setError('Login failed');
-      }
-    };
-
-    if (!token) {
-      login();
-    }
-  }, [token]);
 
   useEffect(() => {
     // Request initial entries from SketchUp
@@ -98,7 +85,10 @@ function AppContent() {
 
   const login = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/login', { username: 'demo', password: 'demo' });
+      const response = await axios.post(
+        'http://localhost:5000/api/auth/login',
+        { email: 'admin@lyke.be', password: 'admin' },
+      );
       const newToken = response.data.token;
       Cookies.set('token', newToken, { expires: 1 }); // Expires in 1 day
       setToken(newToken);
@@ -115,9 +105,10 @@ function AppContent() {
           return;
         }
 
-        const response = await axios.get('http://localhost:5000/api/greeting', {
+        const response = await axios.get('http://localhost:5000/api/health', {
           headers: { Authorization: `Bearer ${token}` },
         });
+        debugger;
         setServerMessage(response.data.message);
         setLoading(false);
       } catch (err) {
@@ -219,18 +210,26 @@ function AppContent() {
 }
 
 function Login() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('/api/login', { username, password });
+      console.log('Attempting login with:', { email, password }); // Debug logging
+      const response = await axios.post(
+        'http://localhost:5000/api/auth/login',
+        {
+          email,
+          password,
+        },
+      );
       const newToken = response.data.token;
-      Cookies.set('token', newToken, { expires: 1 }); // Expires in 1 day
+      Cookies.set('token', newToken, { expires: 1 });
       window.location.href = '/';
-    } catch (err) {
-      setError('Login failed');
+    } catch (err: any) {
+      console.error('Login error:', err.response?.data || err); // Better error logging
+      setError(err.response?.data?.message || 'Login failed');
     }
   };
 
@@ -243,8 +242,8 @@ function Login() {
         {error && <p className="text-red-500 dark:text-red-400">{error}</p>}
         <input
           type="text"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           placeholder="Username"
           className="w-full py-2 px-4 mb-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300"
         />
