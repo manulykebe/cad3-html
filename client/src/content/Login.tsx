@@ -1,15 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Cookies from 'js-cookie';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function LoginContent() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+  const navigate = useNavigate();
+  const { login, isLoggedIn } = useAuth();
   
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate('/');
+    }
+  }, [isLoggedIn, navigate]);
     const handleLogin = async () => {
       try {
-        console.log('Attempting login with:', { email, password }); // Debug logging
         const response = await axios.post(
           'http://localhost:5000/api/auth/login',
           {
@@ -18,10 +25,10 @@ export default function LoginContent() {
           },
         );
         const newToken = response.data.token;
-        Cookies.set('token', newToken, { expires: 1 });
-        window.location.href = '/';
+      login(newToken);
+      navigate('/');
       } catch (err: any) {
-        console.error('Login error:', err.response?.data || err); // Better error logging
+      console.error('Login error:', err.response?.data || err);
         setError(err.response?.data?.message || 'Login failed');
       }
     };

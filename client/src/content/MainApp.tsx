@@ -32,7 +32,18 @@ export default function AppContent() {
   useEffect(() => {
     // Attach the updateDropdown function to the window object
     (window as any).updateDropdown = updateDropdown;
+    (window as any).updateExportOutput = updateExportOutput;
   }, []);
+
+  function updateExportOutput(content) {
+    document.getElementById('NwEjkCPU')!.textContent = content;
+  }
+
+  const handleExportV12 = () => {
+    if (typeof sketchup !== 'undefined') {
+      sketchup.exportV12();
+    }
+  };
 
   const handleSetOriginal = () => {
     if (typeof sketchup !== 'undefined') {
@@ -137,6 +148,15 @@ export default function AppContent() {
                   {serverMessage}
                 </p>
               )}
+            </div>
+            <div>
+              <button
+                onClick={handleExportV12}
+                className="w-48 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Export V12{' '}
+              </button>
+              <div id="NwEjkCPU"></div>
             </div>
 
             <div className="space-y-4">
