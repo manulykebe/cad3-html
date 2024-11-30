@@ -37,8 +37,8 @@ export default function AppContent() {
 
   const [outputContent, setOutputContent] = useState('');
 
-  const updateExportOutput = (content: string) => {
-    setOutputContent(content);
+  const updateExportOutput = (content: JSON) => {
+    setOutputContent(JSON.stringify(content, null, 4));
   };
 
   const handleExportV12 = () => {
@@ -151,16 +151,16 @@ export default function AppContent() {
                 </p>
               )}
             </div>
-            <div>
+            <div className="h-48 overflow-auto font-mono whitespace-pre rounded-md bg-gray-50 p-4">
               <button
                 onClick={handleExportV12}
                 className="w-48 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
                 Export V12{' '}
               </button>
-              <div className="text-gray-700 dark:text-gray-300">
+              <pre className="whitespace-pre-wrap bg-gray-100 dark:bg-gray-800 p-4 rounded-md">
                 {outputContent}
-              </div>
+              </pre>
             </div>
 
             <div className="space-y-4">
