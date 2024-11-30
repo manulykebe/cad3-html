@@ -35,9 +35,11 @@ export default function AppContent() {
     (window as any).updateExportOutput = updateExportOutput;
   }, []);
 
-  function updateExportOutput(content) {
-    document.getElementById('NwEjkCPU')!.textContent = content;
-  }
+  const [outputContent, setOutputContent] = useState('');
+
+  const updateExportOutput = (content: string) => {
+    setOutputContent(content);
+  };
 
   const handleExportV12 = () => {
     if (typeof sketchup !== 'undefined') {
@@ -156,7 +158,9 @@ export default function AppContent() {
               >
                 Export V12{' '}
               </button>
-              <div id="NwEjkCPU"></div>
+              <div className="text-gray-700 dark:text-gray-300">
+                {outputContent}
+              </div>
             </div>
 
             <div className="space-y-4">
