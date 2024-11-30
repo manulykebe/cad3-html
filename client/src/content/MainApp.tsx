@@ -43,7 +43,7 @@ export default function AppContent() {
 
   const handleExportV12 = () => {
     if (typeof sketchup !== 'undefined') {
-      sketchup.exportV12();
+      sketchup.exportV12(false);
     }
   };
 
