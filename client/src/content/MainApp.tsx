@@ -7,7 +7,6 @@ import Cookies from 'js-cookie';
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Cad3Viewer } from '../components/three/Cad3Viewer';
-import sampleData from '../../src/testfile.json';
 
 export default function AppContent() {
   const { isDark, toggle } = useTheme();
@@ -41,7 +40,7 @@ export default function AppContent() {
 
   const updateExportOutput = (content: JSON) => {
     setOutputContent(JSON.stringify(content, null, 4));
-    setCadData(sampleData);
+    setCadData(content);
 
   };
 
