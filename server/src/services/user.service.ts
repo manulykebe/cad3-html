@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -20,7 +20,6 @@ export class UserService {
 
   constructor() {
     this.usersFilePath = path.join(__dirname, '../data/users.json');
-    console .log(this.usersFilePath);
   }
   private async readUsers(): Promise<User[]> {
     try {
