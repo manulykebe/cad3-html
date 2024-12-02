@@ -6,6 +6,8 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
+import { Cad3Viewer } from '../components/three/Cad3Viewer';
+import sampleData from '../../src/testfile.json';
 
 export default function AppContent() {
   const { isDark, toggle } = useTheme();
@@ -13,7 +15,7 @@ export default function AppContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [token, setToken] = useState(Cookies.get('token') || '');
-
+  const [cadData, setCadData] = useState<any>(null);
   const [entries, setEntries] = useState<string[]>([]);
   const [newEntry, setNewEntry] = useState('');
 
@@ -39,6 +41,8 @@ export default function AppContent() {
 
   const updateExportOutput = (content: JSON) => {
     setOutputContent(JSON.stringify(content, null, 4));
+    setCadData(sampleData);
+
   };
 
   const handleExportV12 = () => {
@@ -115,7 +119,6 @@ export default function AppContent() {
         const response = await axios.get('http://localhost:5000/api/health', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        debugger;
         setServerMessage(response.data.message);
         setLoading(false);
       } catch (err) {
@@ -158,6 +161,7 @@ export default function AppContent() {
               >
                 Export V12{' '}
               </button>
+              <Cad3Viewer data={cadData} />
               <pre className="whitespace-pre-wrap bg-gray-100 dark:bg-gray-800 p-4 rounded-md">
                 {outputContent}
               </pre>

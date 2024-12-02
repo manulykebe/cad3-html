@@ -14,6 +14,8 @@ import LoginContent from './content/Login';
 import SketchupConsoleContent from './content/SketchupConsole';
 import Navigation from './components/Navigation';
 import ProtectedRoute from './components/ProtectedRoute';
+import { Cad3Viewer } from './components/three/Cad3Viewer';
+import testfileData from './testfile.json';
 
 function App() {
   return (
@@ -23,6 +25,7 @@ function App() {
           <Navigation />
           <Routes>
             <Route path="/login" element={<LoginContent />} />
+            <Route path="/cad3" element={<Cad3Viewer data={testfileData} />} />
             <Route
               path="/"
               element={
