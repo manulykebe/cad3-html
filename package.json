@@ -25,5 +25,8 @@
     "hooks": {
       "pre-commit": "pretty-quick --staged"
     }
+  },
+  "dependencies": {
+    "@types/three": "^0.170.0"
   }
 }
