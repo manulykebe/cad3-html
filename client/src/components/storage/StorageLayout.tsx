@@ -78,6 +78,11 @@ const StorageLayout: React.FC = () => {
     }
   }, [rightPanelHovered, rightPanelPinned]);
 
+  // Determine if transitions should be active
+  const shouldAnimate = !isResizingLeft && !isResizingRight;
+  const transitionStyle = shouldAnimate ? 'width 300ms ease-in-out' : 'none';
+  const marginTransitionStyle = shouldAnimate ? 'margin 300ms ease-in-out' : 'none';
+
   return (
     <div className="relative h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden">
       {/* Left Panel */}
@@ -86,7 +91,7 @@ const StorageLayout: React.FC = () => {
         className="fixed top-0 left-0 h-full bg-white dark:bg-gray-800 shadow-lg z-10 overflow-y-auto"
         style={{
           width: `${leftPanelWidth}px`,
-          transition: 'width 300ms ease-in-out'
+          transition: transitionStyle
         }}
         onMouseEnter={() => setLeftPanelHovered(true)}
         onMouseLeave={() => setLeftPanelHovered(false)}
@@ -133,7 +138,7 @@ const StorageLayout: React.FC = () => {
         style={{
           marginLeft: leftPanelPinned ? `${leftPanelWidth}px` : '20px',
           marginRight: rightPanelPinned ? `${rightPanelWidth}px` : '20px',
-          transition: 'margin 300ms ease-in-out'
+          transition: marginTransitionStyle
         }}
       >
         {selectedFile ? (
@@ -151,7 +156,7 @@ const StorageLayout: React.FC = () => {
         className="fixed top-0 right-0 h-full bg-white dark:bg-gray-800 shadow-lg z-10 overflow-y-auto"
         style={{
           width: `${rightPanelWidth}px`,
-          transition: 'width 300ms ease-in-out'
+          transition: transitionStyle
         }}
         onMouseEnter={() => setRightPanelHovered(true)}
         onMouseLeave={() => setRightPanelHovered(false)}
