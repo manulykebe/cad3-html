@@ -88,7 +88,7 @@ const StorageLayout: React.FC = () => {
       {/* Left Panel */}
       <div 
         ref={leftPanelRef}
-        className="fixed top-0 left-0 h-full bg-white dark:bg-gray-800 shadow-lg z-10 overflow-x-hidden overflow-y-auto"
+        className="fixed top-0 left-0 h-full bg-white dark:bg-gray-800 shadow-lg z-10 flex flex-col"
         style={{
           width: `${leftPanelWidth}px`,
           transition: transitionStyle
@@ -113,12 +113,12 @@ const StorageLayout: React.FC = () => {
             )}
           </button>
         </div>
-        <div className="p-0 mt-10">
+        <div className="flex-1 overflow-y-auto p-0 mt-10">
           <FileTree onFileSelect={handleFileSelect} />
         </div>
         {leftPanelPinned && (
           <div
-            className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-500"
+            className="absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-500 z-30"
             onMouseDown={() => setIsResizingLeft(true)}
           />
         )}
@@ -153,7 +153,7 @@ const StorageLayout: React.FC = () => {
       {/* Right Panel */}
       <div
         ref={rightPanelRef}
-        className="fixed top-0 right-0 h-full bg-white dark:bg-gray-800 shadow-lg z-10 overflow-x-hidden overflow-y-auto"
+        className="fixed top-0 right-0 h-full bg-white dark:bg-gray-800 shadow-lg z-10 flex flex-col"
         style={{
           width: `${rightPanelWidth}px`,
           transition: transitionStyle
@@ -178,7 +178,7 @@ const StorageLayout: React.FC = () => {
             )}
           </button>
         </div>
-        <div className="p-0 mt-10">
+        <div className="flex-1 overflow-y-auto p-0 mt-10">
           {selectedFile && (
             <div className="text-sm text-gray-600 dark:text-gray-300 p-4">
               <h3 className="font-semibold mb-2">File Details</h3>
@@ -188,7 +188,7 @@ const StorageLayout: React.FC = () => {
         </div>
         {rightPanelPinned && (
           <div
-            className="absolute top-0 left-0 w-1 h-full cursor-col-resize hover:bg-blue-500"
+            className="absolute top-0 left-0 w-1 h-full cursor-col-resize hover:bg-blue-500 z-30"
             onMouseDown={() => setIsResizingRight(true)}
           />
         )}
