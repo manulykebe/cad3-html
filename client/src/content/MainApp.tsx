@@ -41,10 +41,9 @@ export default function AppContent() {
   const updateExportOutput = (content: JSON) => {
     setOutputContent(JSON.stringify(content, null, 4));
     setCadData(content);
-
   };
 
-  const handleExportV12 = () => {
+  const handleImportV12 = () => {
     if (typeof sketchup !== 'undefined') {
       sketchup.exportV12(false);
     }
@@ -155,10 +154,10 @@ export default function AppContent() {
             </div>
             <div className="h-48 overflow-auto font-mono whitespace-pre rounded-md bg-gray-50 p-4">
               <button
-                onClick={handleExportV12}
+                onClick={handleImportV12}
                 className="w-48 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                Export V12{' '}
+                Import V12{' '}
               </button>
               <Cad3Viewer data={cadData} />
               <pre className="whitespace-pre-wrap bg-gray-100 dark:bg-gray-800 p-4 rounded-md">
