@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Cad3Viewer } from '../components/three/Cad3Viewer';
 
+
 export default function AppContent() {
   const { isDark, toggle } = useTheme();
   const [serverMessage, setServerMessage] = useState('');
@@ -46,6 +47,29 @@ export default function AppContent() {
   const handleImportV12 = () => {
     if (typeof sketchup !== 'undefined') {
       sketchup.exportV12(false);
+    }
+  };
+
+  const handleSaveToS3 = async () => {
+    if (!cadData) {
+      alert('Please import a model first');
+      return;
+    }
+
+    try {
+      console.log('Saving model:', `assets\\${cadData.model}`);
+      const response = await axios.post('/api/files/upload', {
+        filename: `assets\\${cadData.model}`,
+        content: JSON.stringify(cadData)
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      alert('Model saved successfully');
+    } catch (error) {
+      console.error('Save error:', error);
+      alert('Error saving model');
     }
   };
 
@@ -153,12 +177,20 @@ export default function AppContent() {
               )}
             </div>
             <div className="h-48 overflow-auto font-mono whitespace-pre rounded-md bg-gray-50 p-4">
-              <button
-                onClick={handleImportV12}
-                className="w-48 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Import V12{' '}
-              </button>
+              <div className="flex space-x-4 mb-4">
+                <button
+                  onClick={handleImportV12}
+                  className="py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Import V12
+                </button>
+                <button
+                  onClick={handleSaveToS3}
+                  className="py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Save to S3
+                </button>
+              </div>
               <Cad3Viewer data={cadData} />
               <pre className="whitespace-pre-wrap bg-gray-100 dark:bg-gray-800 p-4 rounded-md">
                 {outputContent}

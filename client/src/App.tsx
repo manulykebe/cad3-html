@@ -7,7 +7,6 @@ import {
 } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
-import { useAuth } from './context/AuthContext';
 
 import AppContent from './content/MainApp';
 import LoginContent from './content/Login';

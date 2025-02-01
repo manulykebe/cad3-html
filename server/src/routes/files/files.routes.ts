@@ -7,6 +7,7 @@ import {
   updateFile
 } from '../../controllers/files/files.controller.js';
 import { auth } from '../../middleware/auth.js';
+// import express from 'express';
 
 const router = Router();
 
@@ -18,6 +19,10 @@ router.use(auth);
 // DELETE /api/files/:name           - Delete a file
 // GET    /api/files/list            - List all files
 // PUT    /api/files/:name           - Update a file
+
+// Configure file upload size limit
+// router.use(express.json({ limit: '50mb' }));
+// router.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 
 router.post('/upload', uploadFile);
