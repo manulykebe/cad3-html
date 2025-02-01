@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/auth.routes.js';
 import userRoutes from './routes/user.routes.js';
+import fileRoutes from './routes/files/files.routes.js';
 
 dotenv.config();
 
@@ -17,8 +18,9 @@ app.use('/api/auth', authRoutes);
 
 // Protected routes
 app.use('/api/users', userRoutes);
+app.use('/api/files', fileRoutes);
 
-// Health check endpoint (protected)
+// Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date(), message: 'ok' });
 });

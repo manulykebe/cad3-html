@@ -1,10 +1,5 @@
 import bcrypt from 'bcryptjs';
-import fs from 'fs/promises';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import { FileStorageService } from './files/files.service.js';
 
 interface User {
   id: string;
@@ -16,24 +11,24 @@ interface User {
 }
 
 export class UserService {
-  private usersFilePath: string;
+  private fileService: FileStorageService;
+  private readonly USERS_FILE = 'users.json';
 
   constructor() {
-    this.usersFilePath = path.join(__dirname, '../data/users.json');
+    this.fileService = new FileStorageService();
   }
+
   private async readUsers(): Promise<User[]> {
     try {
-      const data = await fs.readFile(this.usersFilePath, 'utf-8');
-      return JSON.parse(data);
+      const data = await this.fileService.getFile(this.USERS_FILE);
+      return data ? JSON.parse(data) : [];
     } catch (error) {
       return [];
     }
   }
 
   private async writeUsers(users: User[]): Promise<void> {
-    const dirPath = path.dirname(this.usersFilePath);
-    await fs.mkdir(dirPath, { recursive: true });
-    await fs.writeFile(this.usersFilePath, JSON.stringify(users, null, 2));
+    await this.fileService.saveFile(this.USERS_FILE, JSON.stringify(users, null, 2));
   }
 
   async findAll(): Promise<Omit<User, 'password'>[]> {
@@ -56,8 +51,7 @@ export class UserService {
     const saltRounds = 10;
     const secretKey = process.env.JWT_SECRET_KEY;
 
-
-    const hashedPassword = await bcrypt.hash(userData.password+ secretKey, saltRounds);
+    const hashedPassword = await bcrypt.hash(userData.password + secretKey, saltRounds);
     const newUser = {
       id: Date.now().toString(),
       ...userData,
