@@ -3,6 +3,10 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "install:all": "npm i && cd client && npm i && cd ../server && npm i",
     "audit:all": "npm audit fix && cd client && npm audit fix && cd ../server && npm audit fix",
