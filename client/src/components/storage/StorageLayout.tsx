@@ -2,8 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Pin, PinOff } from 'lucide-react';
 import { Cad3Viewer } from '../three/Cad3Viewer';
 import { FileTree } from './FileTree.tsx';
+import { ThemeToggle } from '../ThemeToggle';
+import { useTheme } from '../../context/ThemeContext';
 
 const StorageLayout: React.FC = () => {
+  const { isDark, toggle } = useTheme();
   // Panel state
   const [leftPanelPinned, setLeftPanelPinned] = useState(true);
   const [rightPanelPinned, setRightPanelPinned] = useState(true);
@@ -83,8 +86,13 @@ const StorageLayout: React.FC = () => {
   const transitionStyle = shouldAnimate ? 'width 300ms ease-in-out' : 'none';
   const marginTransitionStyle = shouldAnimate ? 'margin 300ms ease-in-out' : 'none';
 
+  const scrollbarClasses = "scrollbar-thin scrollbar-track-gray-200 dark:scrollbar-track-gray-700 scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-500 scrollbar-thumb-rounded-full hover:scrollbar-thumb-gray-500 dark:hover:scrollbar-thumb-gray-400";
+
   return (
     <div className="relative h-screen bg-gray-100 dark:bg-gray-900 overflow-hidden">
+      {/* Theme Toggle */}
+      <ThemeToggle isDark={isDark} toggle={toggle} />
+      
       {/* Left Panel */}
       <div 
         ref={leftPanelRef}
@@ -113,7 +121,7 @@ const StorageLayout: React.FC = () => {
             )}
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-0 mt-10">
+        <div className={`flex-1 overflow-y-auto p-0 mt-10 ${scrollbarClasses}`}>
           <FileTree onFileSelect={handleFileSelect} />
         </div>
         {leftPanelPinned && (
@@ -178,7 +186,7 @@ const StorageLayout: React.FC = () => {
             )}
           </button>
         </div>
-        <div className="flex-1 overflow-y-auto p-0 mt-10">
+        <div className={`flex-1 overflow-y-auto p-0 mt-10 ${scrollbarClasses}`}>
           {selectedFile && (
             <div className="text-sm text-gray-600 dark:text-gray-300 p-4">
               <h3 className="font-semibold mb-2">File Details</h3>
