@@ -6,6 +6,9 @@ export class S3StorageProvider implements StorageProvider {
   private bucket: string;
   
   constructor(bucket: string) {
+    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+      throw new Error('AWS credentials not configured');
+    }
     this.bucket = bucket;
     this.client = new S3Client({ 
       region: process.env.AWS_REGION,
