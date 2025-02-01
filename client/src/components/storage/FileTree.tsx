@@ -86,7 +86,7 @@ export const FileTree: React.FC<FileTreeProps> = ({ onFileSelect }) => {
     const isExpanded = expandedNodes.has(node.path);
 
     return (
-      <div key={node.path} style={{ marginLeft: `${level * 8}px` }}>
+      <div key={node.path} style={{ marginLeft: `16px` }}>
         <div
           className={`flex items-center py-0 px-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded cursor-pointer ${
             node.isDirectory ? '' : 'text-gray-600 dark:text-gray-300'
@@ -124,6 +124,6 @@ export const FileTree: React.FC<FileTreeProps> = ({ onFileSelect }) => {
   };
 
   return (
-    <div className="overflow-auto">{tree.map((node) => renderNode(node))}</div>
+    <div className="overflow-hidden">{tree.map((node) => renderNode(node))}</div>
   );
 };

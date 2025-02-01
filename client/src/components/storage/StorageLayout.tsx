@@ -121,7 +121,7 @@ const StorageLayout: React.FC = () => {
             )}
           </button>
         </div>
-        <div className={`flex-1 overflow-y-auto p-0 mt-10 ${scrollbarClasses}`}>
+        <div className={`flex-1 overflow-x-hidden overflow-y-auto p-0 mt-10 ${scrollbarClasses}`}>
           <FileTree onFileSelect={handleFileSelect} />
         </div>
         {leftPanelPinned && (
@@ -186,7 +186,7 @@ const StorageLayout: React.FC = () => {
             )}
           </button>
         </div>
-        <div className={`flex-1 overflow-y-auto p-0 mt-10 ${scrollbarClasses}`}>
+        <div className={`flex-1 overflow-x-hidden overflow-y-auto p-0 mt-10 ${scrollbarClasses}`}>
           {selectedFile && (
             <div className="text-sm text-gray-600 dark:text-gray-300 p-4">
               <h3 className="font-semibold mb-2">File Details</h3>
