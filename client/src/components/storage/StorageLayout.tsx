@@ -88,7 +88,7 @@ const StorageLayout: React.FC = () => {
       {/* Left Panel */}
       <div 
         ref={leftPanelRef}
-        className="fixed top-0 left-0 h-full bg-white dark:bg-gray-800 shadow-lg z-10 overflow-y-auto"
+        className="fixed top-0 left-0 h-full bg-white dark:bg-gray-800 shadow-lg z-10 overflow-x-hidden overflow-y-auto"
         style={{
           width: `${leftPanelWidth}px`,
           transition: transitionStyle
@@ -153,7 +153,7 @@ const StorageLayout: React.FC = () => {
       {/* Right Panel */}
       <div
         ref={rightPanelRef}
-        className="fixed top-0 right-0 h-full bg-white dark:bg-gray-800 shadow-lg z-10 overflow-y-auto"
+        className="fixed top-0 right-0 h-full bg-white dark:bg-gray-800 shadow-lg z-10 overflow-x-hidden overflow-y-auto"
         style={{
           width: `${rightPanelWidth}px`,
           transition: transitionStyle
