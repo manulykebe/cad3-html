@@ -1,37 +1,40 @@
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { StorageProvider } from './storage.provider.js';
+import { config } from '../../config/env.js';
 
+function replaceInvalidCharacters(filename: string): string {
+  return filename.replace(/[\\]/g, '/').replace(/[^/a-zA-Z0-9_.-]/g, '_');
+}
 export class S3StorageProvider implements StorageProvider {
   private client: S3Client;
   private bucket: string;
   
   constructor(bucket: string) {
-    if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-      throw new Error('AWS credentials not configured');
-    }
     this.bucket = bucket;
     this.client = new S3Client({ 
-      region: process.env.AWS_REGION,
+      region: config.aws.region,
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!
+        accessKeyId: config.aws.accessKeyId,
+        secretAccessKey: config.aws.secretAccessKey
       }
     });
   }
 
   async save(filename: string, content: string): Promise<void> {
+    const key = replaceInvalidCharacters(filename);
     await this.client.send(new PutObjectCommand({
       Bucket: this.bucket,
-      Key: filename,
+      Key: key,
       Body: content,
     }));
   }
 
   async get(filename: string): Promise<string | null> {
+    const key = replaceInvalidCharacters(filename);
     try {
       const response = await this.client.send(new GetObjectCommand({
         Bucket: this.bucket,
-        Key: filename,
+        Key: key,
       }));
       return await response.Body?.transformToString() ?? null;
     } catch (error) {
@@ -40,9 +43,10 @@ export class S3StorageProvider implements StorageProvider {
   }
 
   async delete(filename: string): Promise<void> {
+    const key = replaceInvalidCharacters(filename);
     await this.client.send(new DeleteObjectCommand({
       Bucket: this.bucket,
-      Key: filename,
+      Key: key,
     }));
   }
 

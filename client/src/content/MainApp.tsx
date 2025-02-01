@@ -57,8 +57,7 @@ export default function AppContent() {
     }
 
     try {
-      // const pathOrKey = `assets\\${cadData.model}`;
-      const pathOrKey = `assets\\test.json`;
+      const pathOrKey = `assets\\${cadData.model}`;
       console.log('Saving model:',pathOrKey);
       const response = await axios.post('/api/files/upload', {
         filename: pathOrKey,

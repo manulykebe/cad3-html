@@ -6,7 +6,7 @@ export class FileStorageService {
   private provider: StorageProvider;
 
   constructor() {
-    this.provider = process.env.NODE_ENV != 'production'
+    this.provider = process.env.NODE_ENV === 'production'
       ? new S3StorageProvider(process.env.AWS_BUCKET_NAME || 'cad3-assets')
       : new LocalStorageProvider();
   }
