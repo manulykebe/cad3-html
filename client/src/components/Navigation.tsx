@@ -59,8 +59,9 @@ const Navigation: React.FC = () => {
     <NavMenu>
       {isLoggedIn && (
         <>
-      <NavItem to="/">Home</NavItem>
-        <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
+          <NavItem to="/">Home</NavItem>
+          <NavItem to="/storage">Storage</NavItem>
+          <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
         </>
       )}
     </NavMenu>
