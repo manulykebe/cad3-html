@@ -1,113 +1,249 @@
-import React, { useRef, useEffect } from 'react';
+import React, { Component } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { createGeometryFromData } from './utils/geometryLoader';
+import { createMeshWithMaterial } from './utils/materialHandler';
 
 interface Cad3ViewerProps {
+  data?: any;
   className?: string;
 }
 
-export const Cad3Viewer: React.FC<Cad3ViewerProps> = ({ className }) => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<THREE.Scene | null>(null);
-  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
-  const controlsRef = useRef<OrbitControls | null>(null);
+export class Cad3Viewer extends Component<Cad3ViewerProps> {
+  private containerRef: React.RefObject<HTMLDivElement>;
+  private scene: THREE.Scene;
+  private camera: THREE.PerspectiveCamera;
+  private renderer: THREE.WebGLRenderer;
+  private controls: OrbitControls;
+  private mesh: THREE.Mesh | null;
+  private animationFrameId: number | null;
+  private clock: THREE.Clock;
+  private initialPosition: THREE.Vector3;
 
-  useEffect(() => {
-    if (!containerRef.current) return;
+  constructor(props: Cad3ViewerProps) {
+    super(props);
+    this.containerRef = React.createRef();
+    this.animationFrameId = null;
+    this.mesh = null;
+    this.clock = new THREE.Clock();
+    this.initialPosition = new THREE.Vector3();
 
-    // Scene setup
-    const scene = new THREE.Scene();
-    sceneRef.current = scene;
+    // Initialize scene
+    this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0xf0f0f0);
 
-    // Camera setup
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      containerRef.current.clientWidth / containerRef.current.clientHeight,
-      0.1,
-      1000
+    // Initialize camera
+    this.camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+    this.camera.position.set(5, 5, 5);
+    this.camera.lookAt(0, 0, 0);
+
+    // Initialize renderer
+    this.renderer = new THREE.WebGLRenderer({ 
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true
+    });
+    this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    
+    // Initialize controls
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.setupControls();
+
+    // Add lights
+    this.setupLights();
+
+    // Bind methods
+    this.animate = this.animate.bind(this);
+    this.handleResize = this.handleResize.bind(this);
+  }
+
+  private setupControls(): void {
+    this.controls.enableDamping = true;
+    this.controls.dampingFactor = 0.05;
+    this.controls.screenSpacePanning = true;
+    this.controls.minDistance = 1;
+    this.controls.maxDistance = 50;
+    this.controls.maxPolarAngle = Math.PI / 1.5;
+    this.controls.enablePan = true;
+    this.controls.panSpeed = 0.5;
+    this.controls.rotateSpeed = 0.5;
+    this.controls.zoomSpeed = 1.2;
+    this.controls.enableZoom = true;
+    this.controls.autoRotate = true;
+    this.controls.autoRotateSpeed = 2.0;
+  }
+
+  private setupLights(): void {
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    this.scene.add(ambientLight);
+
+    const mainLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    mainLight.position.set(10, 10, 10);
+    mainLight.castShadow = true;
+    mainLight.shadow.mapSize.width = 2048;
+    mainLight.shadow.mapSize.height = 2048;
+    mainLight.shadow.camera.near = 0.5;
+    mainLight.shadow.camera.far = 500;
+    this.scene.add(mainLight);
+
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.3);
+    fillLight.position.set(-5, 5, -5);
+    this.scene.add(fillLight);
+
+    const groundFill = new THREE.DirectionalLight(0xffffff, 0.2);
+    groundFill.position.set(0, -5, 0);
+    this.scene.add(groundFill);
+  }
+
+  private fitCameraToObject(mesh: THREE.Mesh, offset: number = 1.25): void {
+    const boundingBox = new THREE.Box3();
+    boundingBox.setFromObject(mesh);
+
+    const center = new THREE.Vector3();
+    boundingBox.getCenter(center);
+    
+    // Store initial position for animation
+    this.initialPosition.copy(center);
+
+    const size = new THREE.Vector3();
+    boundingBox.getSize(size);
+
+    const maxDim = Math.max(size.x, size.y, size.z);
+    const fov = this.camera.fov * (Math.PI / 180);
+    const cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2)) * offset;
+
+    const minZ = boundingBox.min.z;
+    const cameraToFarEdge = (minZ < 0) ? -minZ + cameraZ : cameraZ - minZ;
+
+    this.camera.position.set(
+      center.x + cameraZ,
+      center.y + cameraZ,
+      center.z + cameraZ
     );
-    camera.position.z = 5;
-    cameraRef.current = camera;
+    this.camera.lookAt(center);
+    this.camera.far = cameraToFarEdge * 3;
+    this.camera.updateProjectionMatrix();
 
-    // Renderer setup
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    containerRef.current.appendChild(renderer.domElement);
-    rendererRef.current = renderer;
+    this.controls.target.copy(center);
+    this.controls.minDistance = cameraZ * 0.5;
+    this.controls.maxDistance = cameraZ * 2;
+    this.controls.update();
+  }
 
-    // OrbitControls setup
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controlsRef.current = controls;
+  private animate(): void {
+    this.animationFrameId = requestAnimationFrame(this.animate);
 
-    // Add some basic lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
+    // Update controls
+    this.controls.update();
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-    directionalLight.position.set(10, 10, 10);
-    scene.add(directionalLight);
-
-    // Add a simple cube for testing
-    const geometry = new THREE.BoxGeometry();
-    const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
-    const cube = new THREE.Mesh(geometry, material);
-    scene.add(cube);
-
-    // Animation loop
-    const animate = () => {
-      requestAnimationFrame(animate);
+    if (this.mesh) {
+      const time = this.clock.getElapsedTime();
       
-      if (controlsRef.current) {
-        controlsRef.current.update();
-      }
+      // Smooth floating animation using the initial position as base
+      this.mesh.position.y = this.initialPosition.y + Math.sin(time * 2) * 0.1;
       
-      if (rendererRef.current && sceneRef.current && cameraRef.current) {
-        rendererRef.current.render(sceneRef.current, cameraRef.current);
-      }
-    };
-    animate();
+      // Optional: Add subtle rotation
+      // this.mesh.rotation.y = time * 0.1;
+    }
 
-    // Handle window resize
-    const handleResize = () => {
-      if (!containerRef.current || !cameraRef.current || !rendererRef.current) return;
+    // Render scene
+    this.renderer.render(this.scene, this.camera);
+  }
 
-      const width = containerRef.current.clientWidth;
-      const height = containerRef.current.clientHeight;
+  private handleResize(): void {
+    if (!this.containerRef.current) return;
 
-      cameraRef.current.aspect = width / height;
-      cameraRef.current.updateProjectionMatrix();
+    const width = this.containerRef.current.clientWidth;
+    const height = this.containerRef.current.clientHeight;
 
-      rendererRef.current.setSize(width, height);
-    };
-    window.addEventListener('resize', handleResize);
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(width, height, false);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+  }
 
-    // Cleanup
-    return () => {
-      window.removeEventListener('resize', handleResize);
+  private updateScene(): void {
+    const { data } = this.props;
+    if (!data) return;
+
+    if (this.mesh) {
+      this.scene.remove(this.mesh);
+      this.mesh.geometry.dispose();
+      this.mesh = null;
+    }
+
+    try {
+      const geometry = createGeometryFromData(data);
+      const mesh = createMeshWithMaterial(geometry);
       
-      if (containerRef.current && rendererRef.current) {
-        containerRef.current.removeChild(rendererRef.current.domElement);
-      }
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      
+      this.scene.add(mesh);
+      this.mesh = mesh;
+      this.fitCameraToObject(mesh);
 
-      if (controlsRef.current) {
-        controlsRef.current.dispose();
-      }
+      // Reset clock
+      this.clock.start();
+    } catch (error) {
+      console.error('Error creating 3D model:', error);
+    }
+  }
 
-      if (rendererRef.current) {
-        rendererRef.current.dispose();
-      }
-    };
-  }, []);
+  componentDidMount(): void {
+    if (!this.containerRef.current) return;
 
-  return (
-    <div 
-      ref={containerRef} 
-      className={`w-full h-full ${className || ''}`}
-      style={{ position: 'relative' }}
-    />
-  );
-};
+    const width = this.containerRef.current.clientWidth;
+    const height = this.containerRef.current.clientHeight;
+    
+    this.renderer.setSize(width, height);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+    this.containerRef.current.appendChild(this.renderer.domElement);
+
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+
+    window.addEventListener('resize', this.handleResize);
+
+    this.clock.start();
+    this.animate();
+    this.updateScene();
+  }
+
+  componentDidUpdate(prevProps: Cad3ViewerProps): void {
+    if (prevProps.data !== this.props.data) {
+      this.updateScene();
+    }
+  }
+
+  componentWillUnmount(): void {
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
+
+    window.removeEventListener('resize', this.handleResize);
+
+    if (this.mesh) {
+      this.scene.remove(this.mesh);
+      this.mesh.geometry.dispose();
+    }
+
+    this.controls.dispose();
+    this.renderer.dispose();
+
+    if (this.containerRef.current) {
+      this.containerRef.current.removeChild(this.renderer.domElement);
+    }
+  }
+
+  render(): React.ReactNode {
+    return (
+      <div 
+        ref={this.containerRef}
+        className={`w-full h-full ${this.props.className || ''}`}
+        style={{ position: 'relative' }}
+      />
+    );
+  }
+}
