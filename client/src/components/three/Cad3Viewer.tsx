@@ -1,53 +1,113 @@
-import React, { useRef, useEffect, useState } from 'react';
-import { Maximize2, Minimize2 } from 'lucide-react';
-import { createPortal } from 'react-dom';
+import React, { useRef, useEffect } from 'react';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 interface Cad3ViewerProps {
-  data: any;
   className?: string;
 }
 
-export const Cad3Viewer: React.FC<Cad3ViewerProps> = ({ data, className }) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+export const Cad3Viewer: React.FC<Cad3ViewerProps> = ({ className }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const controlsRef = useRef<OrbitControls | null>(null);
 
-  const ViewerContent = () => {
-    
-    return (
-      <div className="relative w-full h-full">
-        <div 
-          className={`bg-gray-100 w-full h-full ${className || ''}`}
-        />
-        <button
-          onClick={() => setIsModalOpen(!isModalOpen)}
-          className="absolute top-4 right-4 p-2 bg-white/80 hover:bg-white rounded-lg shadow-md transition-colors"
-          aria-label={isModalOpen ? 'Close viewer' : 'Open viewer'}
-        >
-          {isModalOpen ? (
-            <Minimize2 className="w-5 h-5 text-gray-700" />
-          ) : (
-            <Maximize2 className="w-5 h-5 text-gray-700" />
-          )}
-        </button>
-      </div>
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    // Scene setup
+    const scene = new THREE.Scene();
+    sceneRef.current = scene;
+
+    // Camera setup
+    const camera = new THREE.PerspectiveCamera(
+      75,
+      containerRef.current.clientWidth / containerRef.current.clientHeight,
+      0.1,
+      1000
     );
-  };
+    camera.position.z = 5;
+    cameraRef.current = camera;
+
+    // Renderer setup
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(containerRef.current.clientWidth, containerRef.current.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    containerRef.current.appendChild(renderer.domElement);
+    rendererRef.current = renderer;
+
+    // OrbitControls setup
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controlsRef.current = controls;
+
+    // Add some basic lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    directionalLight.position.set(10, 10, 10);
+    scene.add(directionalLight);
+
+    // Add a simple cube for testing
+    const geometry = new THREE.BoxGeometry();
+    const material = new THREE.MeshStandardMaterial({ color: 0x00ff00 });
+    const cube = new THREE.Mesh(geometry, material);
+    scene.add(cube);
+
+    // Animation loop
+    const animate = () => {
+      requestAnimationFrame(animate);
+      
+      if (controlsRef.current) {
+        controlsRef.current.update();
+      }
+      
+      if (rendererRef.current && sceneRef.current && cameraRef.current) {
+        rendererRef.current.render(sceneRef.current, cameraRef.current);
+      }
+    };
+    animate();
+
+    // Handle window resize
+    const handleResize = () => {
+      if (!containerRef.current || !cameraRef.current || !rendererRef.current) return;
+
+      const width = containerRef.current.clientWidth;
+      const height = containerRef.current.clientHeight;
+
+      cameraRef.current.aspect = width / height;
+      cameraRef.current.updateProjectionMatrix();
+
+      rendererRef.current.setSize(width, height);
+    };
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      
+      if (containerRef.current && rendererRef.current) {
+        containerRef.current.removeChild(rendererRef.current.domElement);
+      }
+
+      if (controlsRef.current) {
+        controlsRef.current.dispose();
+      }
+
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+      }
+    };
+  }, []);
 
   return (
-    <>
-      {!isModalOpen ? (
-        <div className="w-full h-[400px]">
-          <ViewerContent />
-        </div>
-      ) : (
-        createPortal(
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-            <div className="bg-white w-[90vw] h-[90vh] rounded-lg p-4">
-              <ViewerContent />
-            </div>
-          </div>,
-          document.body
-        )
-      )}
-    </>
+    <div 
+      ref={containerRef} 
+      className={`w-full h-full ${className || ''}`}
+      style={{ position: 'relative' }}
+    />
   );
 };
