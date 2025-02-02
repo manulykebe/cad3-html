@@ -31,12 +31,12 @@ export class OrbitControls {
   }
 
   public setZoom(zoom: number) {
-    this.controls.object.zoom = zoom;
-    this.controls.object.updateProjectionMatrix();
+    (this.controls.object as PerspectiveCamera).zoom = zoom;
+    (this.controls.object as PerspectiveCamera).updateProjectionMatrix();
   }
 
   public getZoom(): number {
-    return this.controls.object.zoom;
+    return (this.controls.object as PerspectiveCamera).zoom;
   }
 
   public dispose() {

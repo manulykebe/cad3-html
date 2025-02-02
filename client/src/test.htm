@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Three.js Multiple Groups with Base‑36 Transforms and Scaling on Translation</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Load Three.js and OrbitControls from jsDelivr CDN (version r128) -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script>
+        // JSON data with multiple groups.
+        const data = {
+            "v": 13.5,
+            "model": "blum/70T3690.TL-waste",
+            "timestamp": "2025-02-02 01:07:19",
+            "g": [
+                {
+                    "id": "21e12c10",
+                    "children": "",
+                    "pos": "0,0,0",
+                    "rot": "0,0,0",
+                    "scale": "255r,255r,255r",
+                    "v": "5fzk,0,avz4|0,0,0|5fzk,0,0|0,0,avz4|5fzk,5fzk,0|5fzk,5fzk,avz4|0,5fzk,avz4|0,5fzk,0",
+                    "f": "0,1,2|1,0,3|4,0,2|0,4,5|6,1,3|1,6,7|6,4,7|4,6,5|4,1,7|1,4,2|0,6,3|6,0,5",
+                    "ed": "1,2|2,4|4,7|7,1|3,0|2,0|0,5|6,3|4,5|5,6|1,3|7,6"
+                },
+                {
+                    "id": "21e12c10",
+                    "children": "",
+                    "pos": "-5fzk,-5fzk,0",
+                    "rot": "0,0,0",
+                    "scale": "255r,255r,255r",
+                    "v": "0,-5fzk,avz4|-5fzk,-5fzk,0|0,-5fzk,0|-5fzk,-5fzk,avz4|0,0,0|0,0,avz4|-5fzk,0,avz4|-5fzk,0,0",
+                    "f": "0,1,2|1,0,3|4,0,2|0,4,5|6,1,3|1,6,7|6,4,7|4,6,5|4,1,7|1,4,2|0,6,3|6,0,5",
+                    "ed": "1,2|2,4|4,7|7,1|3,0|2,0|0,5|6,3|4,5|5,6|1,3|7,6"
+                }
+            ]
+        };
+
+        // Helper to convert a base‑36 string (which may begin with a "-") to a number.
+        function parseBase36(str) {
+            return parseInt(str, 36);
+        }
+
+        // Create the Three.js scene.
+        const scene = new THREE.Scene();
+
+        // Iterate over each group.
+        data.g.forEach(groupData => {
+            // Parse per-axis scale.
+            const scaleStrs = groupData.scale.split(',');
+            const scaleVector = scaleStrs.map(s => parseBase36(s));
+
+            // Parse position: convert from base‑36 and then divide each coordinate by its scale component.
+            const posComponents = groupData.pos.split(',').map((s, i) => parseBase36(s));
+
+            // Parse rotation: here we simply convert using base‑36.
+            // (Rotation values typically aren’t scaled.)
+            const rotComponents = groupData.rot.split(',').map(s => parseBase36(s));
+
+            // Parse vertices: each coordinate is converted and divided by the corresponding axis scale.
+            const vertexStrings = groupData.v.split('|');
+            const vertices = vertexStrings.map(vStr => {
+                const comps = vStr.split(',');
+                return new THREE.Vector3(
+                    parseBase36(comps[0]),
+                    parseBase36(comps[1]),
+                    parseBase36(comps[2])
+                );
+            });
+
+            // Parse faces: split the face string into triangles (indices).
+            const faceStrings = groupData.f.split('|');
+            const indices = [];
+            faceStrings.forEach(faceStr => {
+                const idxs = faceStr.split(',').map(Number);
+                indices.push(idxs[0], idxs[1], idxs[2]);
+            });
+
+            // Create BufferGeometry from the vertices and face indices.
+            const geometry = new THREE.BufferGeometry();
+            const positionArray = new Float32Array(vertices.length * 3);
+            vertices.forEach((v, i) => {
+                positionArray[i * 3] = v.x;
+                positionArray[i * 3 + 1] = v.y;
+                positionArray[i * 3 + 2] = v.z;
+            });
+            geometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3));
+            geometry.setIndex(indices);
+            geometry.computeVertexNormals();
+
+            // Create a mesh material.
+            const material = new THREE.MeshNormalMaterial({ side: THREE.DoubleSide });
+
+            // Create the mesh and apply the translation and rotation.
+            const mesh = new THREE.Mesh(geometry, material);
+            debugger
+            mesh.position.set(...posComponents.map((c, i) => c / scaleVector[i]));
+            mesh.rotation.set(...rotComponents);
+            mesh.scale.set(...scaleVector);
+            scene.add(mesh);
+
+            // Create an edge helper for visual clarity.
+            const edges = new THREE.EdgesGeometry(geometry);
+            const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000 });
+            const edgeLines = new THREE.LineSegments(edges, edgeMaterial);
+            // Apply the same transformation to the edge helper.
+            edgeLines.position.set(...posComponents.map((c, i) => c / scaleVector[i]))
+            edgeLines.rotation.set(...rotComponents);
+            edgeLines.scale.set(...scaleVector);
+            scene.add(edgeLines);
+        });
+
+        // Create a camera.
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(10, 10, 10);
+        camera.lookAt(scene.position);
+
+        // Create the WebGL renderer.
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Add OrbitControls for interactive camera movement.
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+
+        // Animation loop.
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Handle window resizing.
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
+</body>
+
+</html>

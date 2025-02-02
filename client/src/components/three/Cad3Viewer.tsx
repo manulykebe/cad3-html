@@ -1,5 +1,4 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { useThreeScene } from './hooks/useThreeScene';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
@@ -12,28 +11,10 @@ export const Cad3Viewer: React.FC<Cad3ViewerProps> = ({ data, className }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const ViewerContent = () => {
-    const containerRef = useRef<HTMLDivElement>(null);
     
-    // Initialize Three.js scene
-    useThreeScene(containerRef, data);
-
-    // Handle container resize
-    useEffect(() => {
-      if (!containerRef.current) return;
-      
-      const resizeObserver = new ResizeObserver(() => {
-        // Trigger window resize to update renderer
-        window.dispatchEvent(new Event('resize'));
-      });
-      
-      resizeObserver.observe(containerRef.current);
-      return () => resizeObserver.disconnect();
-    }, []);
-
     return (
       <div className="relative w-full h-full">
         <div 
-          ref={containerRef}
           className={`bg-gray-100 w-full h-full ${className || ''}`}
         />
         <button
