@@ -14,19 +14,25 @@ export class Cad3Viewer extends Component<Cad3ViewerProps> {
   private scene: THREE.Scene;
   private camera: THREE.PerspectiveCamera;
   private renderer: THREE.WebGLRenderer;
-  private controls: OrbitControls;
+  private controls: OrbitControls | null;
   private mesh: THREE.Mesh | null;
   private animationFrameId: number | null;
   private clock: THREE.Clock;
   private initialPosition: THREE.Vector3;
+  private isAnimating: boolean;
+  private idleTimer: NodeJS.Timeout | null;
+  private idleTimeout: number = 60000;
 
   constructor(props: Cad3ViewerProps) {
     super(props);
     this.containerRef = React.createRef();
     this.animationFrameId = null;
     this.mesh = null;
+    this.controls = null;
     this.clock = new THREE.Clock();
     this.initialPosition = new THREE.Vector3();
+    this.isAnimating = true;
+    this.idleTimer = null;
 
     // Initialize scene
     this.scene = new THREE.Scene();
@@ -38,17 +44,13 @@ export class Cad3Viewer extends Component<Cad3ViewerProps> {
     this.camera.lookAt(0, 0, 0);
 
     // Initialize renderer
-    this.renderer = new THREE.WebGLRenderer({ 
+    this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       alpha: true,
-      preserveDrawingBuffer: true
+      preserveDrawingBuffer: true,
     });
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    
-    // Initialize controls
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.setupControls();
 
     // Add lights
     this.setupLights();
@@ -59,19 +61,23 @@ export class Cad3Viewer extends Component<Cad3ViewerProps> {
   }
 
   private setupControls(): void {
-    this.controls.enableDamping = true;
-    this.controls.dampingFactor = 0.05;
-    this.controls.screenSpacePanning = true;
-    this.controls.minDistance = 1;
-    this.controls.maxDistance = 50;
-    this.controls.maxPolarAngle = Math.PI / 1.5;
-    this.controls.enablePan = true;
-    this.controls.panSpeed = 0.5;
-    this.controls.rotateSpeed = 0.5;
-    this.controls.zoomSpeed = 1.2;
-    this.controls.enableZoom = true;
-    this.controls.autoRotate = true;
-    this.controls.autoRotateSpeed = 2.0;
+    if (!this.controls) {
+      debugger;
+      this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+      this.controls.enableDamping = true;
+      this.controls.dampingFactor = 0.05;
+      this.controls.screenSpacePanning = false;
+      this.controls.minDistance = 1;
+      this.controls.maxDistance = 50;
+      this.controls.maxPolarAngle = Math.PI / 1.5;
+      this.controls.enablePan = true;
+      this.controls.panSpeed = 0.5;
+      this.controls.rotateSpeed = 0.5;
+      this.controls.zoomSpeed = 1.2;
+      this.controls.enableZoom = true;
+      this.controls.autoRotate = false;
+      this.controls.autoRotateSpeed = 2.0;
+    }
   }
 
   private setupLights(): void {
@@ -102,8 +108,7 @@ export class Cad3Viewer extends Component<Cad3ViewerProps> {
 
     const center = new THREE.Vector3();
     boundingBox.getCenter(center);
-    
-    // Store initial position for animation
+
     this.initialPosition.copy(center);
 
     const size = new THREE.Vector3();
@@ -114,40 +119,37 @@ export class Cad3Viewer extends Component<Cad3ViewerProps> {
     const cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2)) * offset;
 
     const minZ = boundingBox.min.z;
-    const cameraToFarEdge = (minZ < 0) ? -minZ + cameraZ : cameraZ - minZ;
+    const cameraToFarEdge = minZ < 0 ? -minZ + cameraZ : cameraZ - minZ;
 
     this.camera.position.set(
       center.x + cameraZ,
       center.y + cameraZ,
-      center.z + cameraZ
+      center.z + cameraZ,
     );
     this.camera.lookAt(center);
     this.camera.far = cameraToFarEdge * 3;
     this.camera.updateProjectionMatrix();
 
-    this.controls.target.copy(center);
-    this.controls.minDistance = cameraZ * 0.5;
-    this.controls.maxDistance = cameraZ * 2;
-    this.controls.update();
+    if (this.controls) {
+      this.controls.target.copy(center);
+      this.controls.minDistance = cameraZ * 0.5;
+      this.controls.maxDistance = cameraZ * 2;
+      this.controls.update();
+    }
   }
 
   private animate(): void {
     this.animationFrameId = requestAnimationFrame(this.animate);
 
-    // Update controls
-    this.controls.update();
-
-    if (this.mesh) {
-      const time = this.clock.getElapsedTime();
-      
-      // Smooth floating animation using the initial position as base
-      this.mesh.position.y = this.initialPosition.y + Math.sin(time * 2) * 0.1;
-      
-      // Optional: Add subtle rotation
-      // this.mesh.rotation.y = time * 0.1;
+    if (this.controls) {
+      this.controls.update();
     }
 
-    // Render scene
+    if (this.mesh && this.isAnimating) {
+      const time = this.clock.getElapsedTime();
+      this.mesh.position.y = this.initialPosition.y + Math.sin(time * 2) * 0.1;
+    }
+
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -176,16 +178,17 @@ export class Cad3Viewer extends Component<Cad3ViewerProps> {
     try {
       const geometry = createGeometryFromData(data);
       const mesh = createMeshWithMaterial(geometry);
-      
+
       mesh.castShadow = true;
       mesh.receiveShadow = true;
-      
+
       this.scene.add(mesh);
       this.mesh = mesh;
       this.fitCameraToObject(mesh);
 
-      // Reset clock
       this.clock.start();
+      this.isAnimating = true;
+
     } catch (error) {
       console.error('Error creating 3D model:', error);
     }
@@ -196,15 +199,19 @@ export class Cad3Viewer extends Component<Cad3ViewerProps> {
 
     const width = this.containerRef.current.clientWidth;
     const height = this.containerRef.current.clientHeight;
-    
+
     this.renderer.setSize(width, height);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.containerRef.current.appendChild(this.renderer.domElement);
 
+    // Initialize controls after renderer is mounted
+    this.setupControls();
+
+    // this.renderer.domElement.addEventListener('click', this.handleClick);
+    window.addEventListener('resize', this.handleResize);
+
     this.camera.aspect = width / height;
     this.camera.updateProjectionMatrix();
-
-    window.addEventListener('resize', this.handleResize);
 
     this.clock.start();
     this.animate();
@@ -217,31 +224,13 @@ export class Cad3Viewer extends Component<Cad3ViewerProps> {
     }
   }
 
-  componentWillUnmount(): void {
-    if (this.animationFrameId !== null) {
-      cancelAnimationFrame(this.animationFrameId);
-    }
-
-    window.removeEventListener('resize', this.handleResize);
-
-    if (this.mesh) {
-      this.scene.remove(this.mesh);
-      this.mesh.geometry.dispose();
-    }
-
-    this.controls.dispose();
-    this.renderer.dispose();
-
-    if (this.containerRef.current) {
-      this.containerRef.current.removeChild(this.renderer.domElement);
-    }
-  }
-
   render(): React.ReactNode {
     return (
-      <div 
+      <div
         ref={this.containerRef}
-        className={`w-full h-full ${this.props.className || ''}`}
+        className={`w-full h-full overflow-hidden ${
+          this.props.className || ''
+        }`}
         style={{ position: 'relative' }}
       />
     );

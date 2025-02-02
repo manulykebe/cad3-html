@@ -45,24 +45,16 @@ export const createGeometryFromData = (cadData: CadData): BufferGeometry => {
       vertices.push(v1.x, v1.y, v1.z);
       vertices.push(v2.x, v2.y, v2.z);
       vertices.push(v3.x, v3.y, v3.z);
-
-      // Calculate face normal
-      const edge1 = v2.clone().sub(v1);
-      const edge2 = v3.clone().sub(v1);
-      const normal = edge1.cross(edge2).normalize();
-
-      // Add the same normal for all three vertices
-      normals.push(normal.x, normal.y, normal.z);
-      normals.push(normal.x, normal.y, normal.z);
-      normals.push(normal.x, normal.y, normal.z);
-    });
+   });
   });
 
   // Set attributes
   geometry.setAttribute('position', new Float32BufferAttribute(vertices, 3));
-  geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
+  // geometry.setAttribute('normal', new Float32BufferAttribute(normals, 3));
   
   // Compute bounding sphere for camera positioning
+  geometry.computeVertexNormals();
+  geometry.computeBoundingBox();
   geometry.computeBoundingSphere();
   
   return geometry;
