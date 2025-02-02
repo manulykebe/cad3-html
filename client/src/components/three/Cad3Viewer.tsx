@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
-import { createGeometryFromData } from './utils/geometryLoader';
+import { createGroupFromData } from './utils/geometryLoader';
 import { createMeshWithMaterial } from './utils/materialHandler';
 
 interface Cad3ViewerProps {
@@ -15,7 +15,7 @@ export class Cad3Viewer extends Component<Cad3ViewerProps> {
   private camera: THREE.PerspectiveCamera;
   private renderer: THREE.WebGLRenderer;
   private controls: OrbitControls | null;
-  private mesh: THREE.Mesh | null;
+  private group: THREE.Group | null;
   private animationFrameId: number | null;
   private clock: THREE.Clock;
   private initialPosition: THREE.Vector3;
@@ -27,7 +27,7 @@ export class Cad3Viewer extends Component<Cad3ViewerProps> {
     super(props);
     this.containerRef = React.createRef();
     this.animationFrameId = null;
-    this.mesh = null;
+    this.group = null;
     this.controls = null;
     this.clock = new THREE.Clock();
     this.initialPosition = new THREE.Vector3();
@@ -102,9 +102,9 @@ export class Cad3Viewer extends Component<Cad3ViewerProps> {
     this.scene.add(groundFill);
   }
 
-  private fitCameraToObject(mesh: THREE.Mesh, offset: number = 1.25): void {
+  private fitCameraToObject(group: THREE.Group, offset: number = 1.25): void {
     const boundingBox = new THREE.Box3();
-    boundingBox.setFromObject(mesh);
+    boundingBox.setFromObject(group);
 
     const center = new THREE.Vector3();
     boundingBox.getCenter(center);
@@ -145,9 +145,9 @@ export class Cad3Viewer extends Component<Cad3ViewerProps> {
       this.controls.update();
     }
 
-    if (this.mesh && this.isAnimating) {
+    if (this.group && this.isAnimating) {
       const time = this.clock.getElapsedTime();
-      this.mesh.position.y = this.initialPosition.y + Math.sin(time * 2) * 0.1;
+      this.group.position.y = this.initialPosition.y + Math.sin(time * 2) * 0.1;
     }
 
     this.renderer.render(this.scene, this.camera);
@@ -169,22 +169,18 @@ export class Cad3Viewer extends Component<Cad3ViewerProps> {
     const { data } = this.props;
     if (!data) return;
 
-    if (this.mesh) {
-      this.scene.remove(this.mesh);
-      this.mesh.geometry.dispose();
-      this.mesh = null;
+    if (this.group) {
+      this.scene.remove(this.group);
+      this.group = null;
     }
 
     try {
-      const geometry = createGeometryFromData(data);
-      const mesh = createMeshWithMaterial(geometry);
+      const group = createGroupFromData(data);
 
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
 
-      this.scene.add(mesh);
-      this.mesh = mesh;
-      this.fitCameraToObject(mesh);
+      this.scene.add(group);
+      this.group = group;
+      this.fitCameraToObject(group);
 
       this.clock.start();
       this.isAnimating = true;

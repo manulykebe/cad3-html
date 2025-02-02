@@ -23,8 +23,6 @@ const DEFAULT_MATERIAL = new MeshStandardMaterial({
 });
 
 export const createMeshWithMaterial = (geometry: BufferGeometry): Mesh => {
-  // Ensure normals are computed correctly
-  geometry.computeVertexNormals();
 
   const mesh = new Mesh(geometry, DEFAULT_MATERIAL);
   mesh.castShadow = true;
